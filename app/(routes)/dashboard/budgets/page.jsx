@@ -1,13 +1,12 @@
-// File: app/dashboard/budgets/page.jsx
-
+import BudgetList from './_components/BudgetList'
+import CreateBudget from './_components/CreateBudget'
 import React from 'react'
 
 function BudgetsPage() {
   return (
-    <div className='p-4'>
-      <h1 className='text-2xl font-bold'>My Budgets 💰</h1>
-      <p>This is where your budget management components will go.</p>
-      {/* You can add budget lists, charts, forms, etc. here */}
+    <div className='p-10'>
+      <h2 className='font-bold text-3xl'>My Budgets</h2>
+        <BudgetList />
     </div>
   )
 }

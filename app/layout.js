@@ -1,15 +1,15 @@
-import { Geist, Geist_Mono , Outfit } from "next/font/google";
+import { Geist, Geist_Mono, Outfit } from "next/font/google";
 import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
+import { Toaster } from "sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
 });
 const outfit = Outfit({
-  subsets: ["latin"]
+  subsets: ["latin"],
 });
-
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
@@ -22,15 +22,13 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <ClerkProvider>
     <html lang="en">
-      <body
-        className={`${outfit.variable } antialiased` }
-        
-      >
-        {children}
+      <body className={`${outfit.className} antialiased`}>
+        <ClerkProvider publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}>
+          <Toaster />
+          {children}
+        </ClerkProvider>
       </body>
     </html>
-    </ClerkProvider>
   );
 }

@@ -46,7 +46,7 @@ function SideNav() {
         <div className='mt-5'>
             {menuList.map((menu,index)=>(
                 <Link href={menu.path}>
-                <h2 className={`flex gap-2 items-center text-gray-500 
+                <h2 className={`flex gap-2 mt-2 items-center text-gray-500 
                 font-medium p-5 cursor-pointer rounded-md
                  hover:text-indigo-600 hover:bg-blue-100 ${path==menu.path &&'text-indigo-600 bg-blue-100'} `}>
                     <menu.icon />
