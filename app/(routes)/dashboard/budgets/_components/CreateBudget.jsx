@@ -17,7 +17,7 @@ import { toast } from 'sonner';
 import { createBudget } from "@/app/actions/createBudgets";
 import { useUser } from "@clerk/nextjs";
   
-function CreateBudget() {
+function CreateBudget({refreshData}) {
   const { user } = useUser();
   const [emojiIcon,setEmojiIcon] = useState('🙂');
   const [openEmojiPicker,setOpenEmojiPicker] = useState(false);
@@ -32,6 +32,7 @@ function CreateBudget() {
     });
 
     if (result) {
+      refreshData();
       toast("New Budget Created!");
     }
   };

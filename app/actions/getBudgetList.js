@@ -2,7 +2,7 @@
 
 import { db } from "@/utils/dbConfig";
 import { Budgets, Expenses } from "@/utils/schema";
-import { eq, sql } from "drizzle-orm";
+import { desc, eq, sql } from "drizzle-orm";
 import { getTableColumns } from 'drizzle-orm'
 
 export async function getBudgetList(userId) {
@@ -16,7 +16,8 @@ export async function getBudgetList(userId) {
       .from(Budgets)
       .leftJoin(Expenses, eq(Budgets.id, Expenses.budgetId))
       .where(eq(Budgets.createdBy, userId))
-      .groupBy(Budgets.id);
+      .groupBy(Budgets.id)
+      .orderBy(desc(Budgets.id));
 
     return result;
   } catch (error) {

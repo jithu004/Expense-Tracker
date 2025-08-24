@@ -22,9 +22,9 @@ function SideNav() {
         },
         {
             id : 3,
-            name : "Expenses",
+            name : "Transcations",
             icon: ReceiptText,
-            path: "/dashboard/expenses"
+            path: "/dashboard/transactions"
         },
         {
             id : 4,

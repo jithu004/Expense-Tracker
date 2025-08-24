@@ -28,5 +28,4 @@ function BudgetItem({budget}) {
     </div>
   )
 }
-
 export default BudgetItem
