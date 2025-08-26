@@ -2,7 +2,7 @@
 
 import { db } from "@/utils/dbConfig";
 import { Expenses, Income, Budgets } from "@/utils/schema";
-import { eq, sql } from "drizzle-orm";
+import { eq, sql, or, isNull } from "drizzle-orm";
 
 export async function getTransactions(userId) {
   try {
@@ -17,14 +17,19 @@ export async function getTransactions(userId) {
       })
       .from(Expenses)
       .leftJoin(Budgets, eq(Expenses.budgetId, Budgets.id))
-      .where(eq(Budgets.createdBy, userId));
+      .where(
+        or(
+          eq(Budgets.createdBy, userId),  // budgeted expenses
+          isNull(Expenses.budgetId)       // unbudgeted expenses
+        )
+      );
 
     const incomes = await db
       .select({
         id: Income.id,
         title: Income.name,
         amount: Income.amount,
-        category:Income.category,
+        category: Income.category,
         date: Income.createdAt,
         type: sql`'income'`.as("type"),
       })

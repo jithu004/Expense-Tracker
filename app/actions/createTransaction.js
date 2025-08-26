@@ -3,11 +3,15 @@
 import { db } from "@/utils/dbConfig";
 import { Expenses, Income } from "@/utils/schema";
 
-// data = { type: "expense" | "income", name, category, amount, budgetId?, createdBy? }
+// data = { type: "expense" | "income", name, category, amount, date?, budgetId?, createdBy? }
 export async function createTransaction(data) {
   try {
-    const { type, name, category, amount, budgetId, createdBy } = data;
-    const createdAt = new Date().toISOString();
+    const { type, name, category, amount, budgetId, createdBy, date } = data;
+
+    // ✅ Use provided date (from UI) if available, else default to now
+    const createdAt = date 
+      ? new Date(date).toISOString() 
+      : new Date().toISOString();
 
     if (type === "expense") {
       const result = await db.insert(Expenses).values({
