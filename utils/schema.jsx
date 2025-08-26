@@ -1,11 +1,11 @@
-import { integer, numeric, pgTable,serial, varchar } from "drizzle-orm/pg-core";
+import { integer, numeric, pgTable, serial, varchar } from "drizzle-orm/pg-core";
 
-export const Budgets=pgTable('budgets',{
-    id:serial('id').primaryKey(),
-    name:varchar('name').notNull(),
-    amount:varchar('amount').notNull(),
-    icon:varchar('icon'),
-    createdBy:varchar('createdBy').notNull()
+export const Budgets = pgTable('budgets', {
+    id: serial('id').primaryKey(),
+    name: varchar('name').notNull(),
+    amount: varchar('amount').notNull(),
+    icon: varchar('icon'),
+    createdBy: varchar('createdBy').notNull()
 });
 
 export const Expenses = pgTable('expenses', {
@@ -14,9 +14,10 @@ export const Expenses = pgTable('expenses', {
     category: varchar('category').notNull().default("General"),
     amount: numeric('amount').notNull().default(0),
     budgetId: integer('budgetId').references(() => Budgets.id),
-    createdAt: varchar('createdAt').notNull()
+    createdAt: varchar('createdAt').notNull(),
+    // FIX: Add a default value to handle existing rows
+    createdBy: varchar('createdBy').notNull().default('system') 
 });
-
 
 export const Income = pgTable('income', {
     id: serial('id').primaryKey(),

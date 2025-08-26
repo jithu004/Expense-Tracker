@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Plus } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -99,11 +100,18 @@ function CreateTransaction({ onTransactionCreated }) {
   return (
     <Dialog>
       <DialogTrigger>
-        <div className="h-[40px] w-[100px] rounded-xl bg-primary hover:bg-indigo-300 cursor-pointer flex flex-col items-center mb-5 mr-5 z-10">
-          <h2 className="text-white font-bold text-2xl hover:text-indigo-800">
-            +
-          </h2>
-        </div>
+        <Button
+          size="icon"
+          className="
+            h-17 w-17 rounded-full bg-indigo-600 shadow-lg
+            hover:rounded-xl hover:bg-indigo-700
+            transition-all duration-300 ease-in-out
+            animate-pulse-glow
+          "
+        >
+          {/* FIX: Changed h-10 w-10 to size-10 */}
+          <Plus className="size-9" strokeWidth={3} />
+        </Button>
       </DialogTrigger>
 
       <DialogContent>

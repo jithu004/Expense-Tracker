@@ -11,7 +11,8 @@ import {
 
 export default function FilterBox({ filters, setFilters, resetFilters }) {
   return (
-    <div className="bg-slate-100 shadow-md rounded-2xl p-4 flex flex-wrap gap-4 items-center justify-between">
+    // FIX: Added dark:bg-slate-800 for dark mode background
+    <div className="bg-slate-100 dark:bg-gray-800 shadow-md rounded-2xl p-4 flex flex-wrap gap-4 items-center justify-between">
       {/* Date Filter */}
       <div className="w-[200px]">
         <Select

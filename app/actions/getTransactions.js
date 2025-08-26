@@ -2,10 +2,12 @@
 
 import { db } from "@/utils/dbConfig";
 import { Expenses, Income, Budgets } from "@/utils/schema";
-import { eq, sql, or, isNull } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm"; // Removed unused 'or' and 'isNull'
 
 export async function getTransactions(userId) {
   try {
+    // FIX: Simplified and corrected the query to ONLY fetch expenses
+    // created by the current user.
     const expenses = await db
       .select({
         id: Expenses.id,
@@ -16,13 +18,7 @@ export async function getTransactions(userId) {
         type: sql`'expense'`.as("type"),
       })
       .from(Expenses)
-      .leftJoin(Budgets, eq(Expenses.budgetId, Budgets.id))
-      .where(
-        or(
-          eq(Budgets.createdBy, userId),  // budgeted expenses
-          isNull(Expenses.budgetId)       // unbudgeted expenses
-        )
-      );
+      .where(eq(Expenses.createdBy, userId)); // This is the crucial filter
 
     const incomes = await db
       .select({

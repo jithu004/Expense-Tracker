@@ -7,6 +7,9 @@ import FilterBox from "./FilterBox";
 import EditTransactionDialog from "./EditTransactionDialog";
 import { updateTransaction } from "@/app/actions/updateTransaction";
 import { deleteTransaction } from "@/app/actions/deleteTransaction";
+import { useSearch } from "@/app/(routes)/dashboard/_context/SearchContext";
+import EmptyState from "../../_components/EmptyState"; // Import the new component
+import { ReceiptText } from "lucide-react";
 
 export default function TransactionsList({ userId }) {
   const [transactions, setTransactions] = useState([]);
@@ -14,8 +17,8 @@ export default function TransactionsList({ userId }) {
   const [loading, setLoading] = useState(true);
   const [selectedTx, setSelectedTx] = useState(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const { searchTerm } = useSearch();
 
-  // filters state
   const [filters, setFilters] = useState({
     date: "all",
     category: "all",
@@ -23,39 +26,34 @@ export default function TransactionsList({ userId }) {
   });
 
   const resetFilters = () => {
-    setFilters({ date: "all", category: "all", type: "all" });
+    setFilters({ date: 'all', category: 'all', type: 'all' });
   };
-
   const handleOpenDialog = (tx) => {
     setSelectedTx(tx);
     setIsDialogOpen(true);
   };
-
   const handleSave = async (updatedTx) => {
     const res = await updateTransaction(updatedTx);
     if (res.success) {
-      await fetchData(); // refresh list
+      await fetchData();
     }
   };
-
   const handleDelete = async (tx) => {
     const res = await deleteTransaction(tx.id, tx.type);
     if (res.success) {
-      await fetchData(); // refresh list
+      await fetchData();
     }
   };
 
   const fetchData = useCallback(async () => {
     if (!userId) return;
     setLoading(true);
-
     const result = await getTransactions(userId);
     setTransactions(result.transactions || []);
     setTotals({
       income: result.totalIncome || 0,
       expense: result.totalExpenses || 0,
     });
-
     setLoading(false);
   }, [userId]);
 
@@ -72,35 +70,44 @@ export default function TransactionsList({ userId }) {
     return txDate >= weekStart && txDate < weekEnd;
   };
 
+  const filteredTransactions = transactions.filter((tx) => {
+    const searchMatch = searchTerm
+      ? tx.title.toLowerCase().includes(searchTerm.toLowerCase())
+      : true;
+    const typeMatch = filters.type === 'all' || tx.type === filters.type;
+    const categoryMatch = filters.category === 'all' || tx.category?.toLowerCase() === filters.category;
+    let dateMatch = true;
+    const txDate = new Date(tx.date);
+    if (filters.date === 'today') {
+      dateMatch = txDate.toDateString() === new Date().toDateString();
+    } else if (filters.date === 'week') {
+      dateMatch = isThisWeek(txDate);
+    } else if (filters.date === 'month') {
+      const now = new Date();
+      dateMatch = txDate.getMonth() === now.getMonth() && txDate.getFullYear() === now.getFullYear();
+    }
+    return searchMatch && typeMatch && categoryMatch && dateMatch;
+  });
+
   return (
     <div className="p-4 space-y-4">
-      {/* Floating Action Button */}
       <div className="fixed bottom-6 right-6 z-20">
         <CreateTransaction onTransactionCreated={fetchData} />
       </div>
-
-      {/* Totals compact on mobile */}
       <div className="flex items-center justify-between gap-3">
-        <Card className="flex-1 bg-slate-100 shadow-sm rounded-xl border-green-300">
+        <Card className="flex-1 bg-slate-100 dark:bg-slate-800 shadow-sm rounded-xl border-green-300">
           <CardContent className="p-3 text-center">
-            <h2 className="text-sm font-medium text-black">Income</h2>
-            <p className="text-lg font-bold text-green-700">
-              +₹{totals.income}
-            </p>
+            <h2 className="text-sm font-medium text-black dark:text-white">Income</h2>
+            <p className="text-lg font-bold text-green-700">+₹{totals.income}</p>
           </CardContent>
         </Card>
-
-        <Card className="flex-1 bg-slate-100 shadow-sm rounded-xl border-red-300">
+        <Card className="flex-1 bg-slate-100 dark:bg-slate-800 shadow-sm rounded-xl border-red-300">
           <CardContent className="p-3 text-center">
-            <h2 className="text-sm font-medium text-black">Expenses</h2>
-            <p className="text-lg font-bold text-red-600">
-              -₹{totals.expense}
-            </p>
+            <h2 className="text-sm font-medium text-black dark:text-white">Expenses</h2>
+            <p className="text-lg font-bold text-red-600">-₹{totals.expense}</p>
           </CardContent>
         </Card>
       </div>
-
-      {/* FilterBox slimmer */}
       <div className="px-1">
         <FilterBox
           filters={filters}
@@ -109,74 +116,56 @@ export default function TransactionsList({ userId }) {
         />
       </div>
 
-      {/* Transactions */}
+      {/* Conditional Rendering for Empty State */}
       <div className="space-y-3 pb-16">
-        {loading
-          ? [1, 2, 3].map((i) => (
-              <div
-                key={i}
-                className="w-full bg-slate-200 rounded-xl h-[70px] animate-pulse"
-              />
-            ))
-          : transactions
-              .filter((tx) => {
-                if (filters.type !== "all" && tx.type !== filters.type)
-                  return false;
-                if (
-                  filters.category !== "all" &&
-                  tx.category?.toLowerCase() !== filters.category
-                )
-                  return false;
-
-                const txDate = new Date(tx.date);
-                if (filters.date === "today") {
-                  if (txDate.toDateString() !== new Date().toDateString())
-                    return false;
-                }
-                if (filters.date === "week" && !isThisWeek(txDate))
-                  return false;
-                if (filters.date === "month") {
-                  const now = new Date();
-                  if (
-                    txDate.getMonth() !== now.getMonth() ||
-                    txDate.getFullYear() !== now.getFullYear()
-                  )
-                    return false;
-                }
-                return true;
-              })
-              .map((tx) => (
-                <Card
-                  key={`${tx.type}-${tx.id}`}
-                  onClick={() => handleOpenDialog(tx)}
-                  className={`cursor-pointer rounded-xl shadow-sm ${
-                    tx.type === "income"
-                      ? "bg-white border border-green-500"
-                      : "bg-white border border-red-500"
+        {loading ? (
+          [1, 2, 3].map((i) => (
+            <div
+              key={i}
+              className="w-full bg-slate-200 dark:bg-slate-700 rounded-xl h-[70px] animate-pulse"
+            />
+          ))
+        ) : filteredTransactions.length > 0 ? (
+          filteredTransactions.map((tx) => (
+            <Card
+              key={`${tx.type}-${tx.id}`}
+              onClick={() => handleOpenDialog(tx)}
+              className={`cursor-pointer rounded-xl shadow-sm ${
+                tx.type === 'income' ? 'border border-green-500' : 'border border-red-500'
+              }`}
+            >
+              <CardContent className="p-3 flex justify-between items-center">
+                <div>
+                  <h3 className="text-sm font-semibold">{tx.title}</h3>
+                  <p className="text-xs text-gray-500">
+                    {new Date(tx.date).toLocaleDateString()}
+                  </p>
+                  <p className="text-xs text-gray-500">{tx.category}</p>
+                </div>
+                <p
+                  className={`text-base font-bold ${
+                    tx.type === 'income' ? 'text-green-700' : 'text-red-600'
                   }`}
                 >
-                  <CardContent className="p-3 flex justify-between items-center">
-                    <div>
-                      <h3 className="text-sm font-semibold">{tx.title}</h3>
-                      <p className="text-xs text-gray-500">
-                        {new Date(tx.date).toLocaleDateString()}
-                      </p>
-                      <p className="text-xs text-gray-500">{tx.category}</p>
-                    </div>
-                    <p
-                      className={`text-base font-bold ${
-                        tx.type === "income" ? "text-green-700" : "text-red-600"
-                      }`}
-                    >
-                      {tx.type === "expense" ? "-" : "+"}
-                      {tx.amount}
-                    </p>
-                  </CardContent>
-                </Card>
-              ))}
+                  {tx.type === 'expense' ? '-' : '+'}
+                  {tx.amount}
+                </p>
+              </CardContent>
+            </Card>
+          ))
+        ) : (
+          <EmptyState
+            icon={ReceiptText}
+            title={transactions.length === 0 ? "No Transactions Yet" : "No Matching Transactions"}
+            subtitle={
+              transactions.length === 0
+                ? "Click the '+' button to add your first transaction."
+                : "Try adjusting your search or filters."
+            }
+          />
+        )}
       </div>
 
-      {/* Edit dialog */}
       <EditTransactionDialog
         open={isDialogOpen}
         onClose={() => setIsDialogOpen(false)}

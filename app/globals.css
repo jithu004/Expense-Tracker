@@ -1,3 +1,17 @@
+@keyframes pulse-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 theme('colors.indigo.500 / 70%');
+  }
+  50% {
+    box-shadow: 0 0 0 16px theme('colors.indigo.500 / 0%');
+  }
+}
+
+@theme {
+  --animation-pulse-glow: pulse-glow 2s infinite;
+}
+
 @import "tailwindcss";
 @import "tw-animate-css";
 
@@ -120,4 +134,6 @@
     @apply bg-background text-foreground;
   }
 }
+
+
 
