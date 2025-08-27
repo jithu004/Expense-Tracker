@@ -10,9 +10,10 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+// FIX: Import 'buttonVariants' from the button component and 'cn' utility
+import { Button, buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
-import { Plus } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -23,13 +24,12 @@ import {
 import { useUser } from "@clerk/nextjs";
 import { getBudgetList } from "@/app/actions/getBudgetList";
 import { createTransaction } from "@/app/actions/createTransaction";
-
-
+import { Plus } from "lucide-react";
 
 function CreateTransaction({ onTransactionCreated }) {
   const { user } = useUser();
-  
-  const [type, setType] = useState("income"); // income | expense
+
+  const [type, setType] = useState("expense");
   const [name, setName] = useState("");
   const [amount, setAmount] = useState("");
   const [category, setCategory] = useState("");
@@ -38,7 +38,6 @@ function CreateTransaction({ onTransactionCreated }) {
   const [budgetId, setBudgetId] = useState(null);
   const [budgets, setBudgets] = useState([]);
 
-  // predefined categories
   const incomeCategories = ["Salary", "Business", "Gift", "Investment"];
   const expenseCategories = [
     "Food",
@@ -48,7 +47,6 @@ function CreateTransaction({ onTransactionCreated }) {
     "Entertainment",
   ];
 
-  // Fetch budgets for dropdown
   useEffect(() => {
     if (user) fetchBudgets();
   }, [user]);
@@ -58,60 +56,48 @@ function CreateTransaction({ onTransactionCreated }) {
     setBudgets(result);
   };
 
-
-  
   const handleSubmit = async () => {
     if (!amount) return;
-
     const finalCategory = category === "custom" ? customCategory : category;
-
     const payload = {
       type,
-      name: name || (type === "income" ? "Untitled Income" : "Untitled Expense"),
+      name:
+        name || (type === "income" ? "Untitled Income" : "Untitled Expense"),
       amount: Number(amount),
       category: finalCategory || "General",
-      date, // ✅ now backend will use this
+      date,
       createdBy: user?.primaryEmailAddress?.emailAddress,
       budgetId: type === "expense" ? budgetId : null,
     };
-
     const res = await createTransaction(payload);
-
     if (res.success) {
-      console.log("Transaction created:", res.transaction);
-
-      // 🔥 Refresh parent transaction list
       if (onTransactionCreated) onTransactionCreated(res.transaction);
-
-      // Reset fields
       setName("");
       setAmount("");
       setCategory("");
       setCustomCategory("");
       setBudgetId(null);
-      setDate(new Date().toISOString().split("T")[0]); // reset to today
+      setDate(new Date().toISOString().split("T")[0]);
     } else {
       console.error(res.error);
     }
   };
 
-
-
   return (
     <Dialog>
-      <DialogTrigger>
-        <Button
-          size="icon"
-          className="
-            h-17 w-17 rounded-full bg-indigo-600 shadow-lg
-            hover:rounded-xl hover:bg-indigo-700
-            transition-all duration-300 ease-in-out
-            animate-pulse-glow
-          "
+      <DialogTrigger asChild>
+        {/* FIX: Replaced the <Button> component with a standard <button> tag */}
+        <button
+          className={cn(
+            buttonVariants({ size: "icon" }),
+            `h-20 w-20 rounded-full bg-indigo-600 shadow-lg
+             hover:rounded-xl hover:bg-indigo-700
+             transition-all duration-300 ease-in-out
+             animate-pulse-glow`
+          )}
         >
-          {/* FIX: Changed h-10 w-10 to size-10 */}
-          <Plus className="size-9" strokeWidth={3} />
-        </Button>
+          <Plus className="size-10" strokeWidth={3} />
+        </button>
       </DialogTrigger>
 
       <DialogContent>
@@ -121,9 +107,7 @@ function CreateTransaction({ onTransactionCreated }) {
             Add details about your new transaction below
           </DialogDescription>
         </DialogHeader>
-
         <div className="mt-5 space-y-4">
-          {/* Type Toggle */}
           <div className="flex gap-2">
             <Button
               variant={type === "income" ? "default" : "outline"}
@@ -138,24 +122,18 @@ function CreateTransaction({ onTransactionCreated }) {
               Expense
             </Button>
           </div>
-
-          {/* ✅ Name */}
           <Input
             type="text"
             placeholder="Name (e.g. Salary, Dinner at restaurant)"
             value={name}
             onChange={(e) => setName(e.target.value)}
           />
-
-          {/* Amount */}
           <Input
             type="number"
             placeholder="Amount"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
           />
-
-          {/* Category dropdown */}
           <Select value={category} onValueChange={setCategory}>
             <SelectTrigger>
               <SelectValue placeholder="Select Category" />
@@ -171,8 +149,6 @@ function CreateTransaction({ onTransactionCreated }) {
               <SelectItem value="custom">Custom</SelectItem>
             </SelectContent>
           </Select>
-
-          {/* Custom Category input */}
           {category === "custom" && (
             <Input
               type="text"
@@ -181,8 +157,6 @@ function CreateTransaction({ onTransactionCreated }) {
               onChange={(e) => setCustomCategory(e.target.value)}
             />
           )}
-
-          {/* Budget dropdown (only for Expense) */}
           {type === "expense" && (
             <Select onValueChange={setBudgetId} value={budgetId || ""}>
               <SelectTrigger>
@@ -197,15 +171,12 @@ function CreateTransaction({ onTransactionCreated }) {
               </SelectContent>
             </Select>
           )}
-
-          {/* Date */}
           <Input
             type="date"
             value={date}
             onChange={(e) => setDate(e.target.value)}
           />
         </div>
-
         <DialogFooter>
           <DialogClose asChild>
             <Button disabled={!amount} onClick={handleSubmit}>

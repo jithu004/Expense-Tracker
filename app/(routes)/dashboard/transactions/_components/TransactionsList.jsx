@@ -1,5 +1,6 @@
 "use client";
-import React, { useEffect, useState, useCallback } from "react";
+// FIX: Import useMemo
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { getTransactions } from "@/app/actions/getTransactions";
 import { Card, CardContent } from "@/components/ui/card";
 import CreateTransaction from "./CreateTransaction";
@@ -7,17 +8,18 @@ import FilterBox from "./FilterBox";
 import EditTransactionDialog from "./EditTransactionDialog";
 import { updateTransaction } from "@/app/actions/updateTransaction";
 import { deleteTransaction } from "@/app/actions/deleteTransaction";
-import { useSearch } from "@/app/(routes)/dashboard/_context/SearchContext";
-import EmptyState from "../../_components/EmptyState"; // Import the new component
+import { useSearch } from "../../_context/SearchContext";
+import EmptyState from "../../_components/EmptyState";
 import { ReceiptText } from "lucide-react";
 
 export default function TransactionsList({ userId }) {
   const [transactions, setTransactions] = useState([]);
-  const [totals, setTotals] = useState({ income: 0, expense: 0 });
   const [loading, setLoading] = useState(true);
   const [selectedTx, setSelectedTx] = useState(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { searchTerm } = useSearch();
+
+  const [displayTotals, setDisplayTotals] = useState({ income: 0, expense: 0 });
 
   const [filters, setFilters] = useState({
     date: "all",
@@ -50,10 +52,6 @@ export default function TransactionsList({ userId }) {
     setLoading(true);
     const result = await getTransactions(userId);
     setTransactions(result.transactions || []);
-    setTotals({
-      income: result.totalIncome || 0,
-      expense: result.totalExpenses || 0,
-    });
     setLoading(false);
   }, [userId]);
 
@@ -70,24 +68,46 @@ export default function TransactionsList({ userId }) {
     return txDate >= weekStart && txDate < weekEnd;
   };
 
-  const filteredTransactions = transactions.filter((tx) => {
-    const searchMatch = searchTerm
-      ? tx.title.toLowerCase().includes(searchTerm.toLowerCase())
-      : true;
-    const typeMatch = filters.type === 'all' || tx.type === filters.type;
-    const categoryMatch = filters.category === 'all' || tx.category?.toLowerCase() === filters.category;
-    let dateMatch = true;
-    const txDate = new Date(tx.date);
-    if (filters.date === 'today') {
-      dateMatch = txDate.toDateString() === new Date().toDateString();
-    } else if (filters.date === 'week') {
-      dateMatch = isThisWeek(txDate);
-    } else if (filters.date === 'month') {
-      const now = new Date();
-      dateMatch = txDate.getMonth() === now.getMonth() && txDate.getFullYear() === now.getFullYear();
-    }
-    return searchMatch && typeMatch && categoryMatch && dateMatch;
-  });
+  // FIX: Wrap the filtering logic in useMemo
+  const filteredTransactions = useMemo(() => {
+    return transactions.filter((tx) => {
+      const searchMatch = searchTerm
+        ? tx.title.toLowerCase().includes(searchTerm.toLowerCase())
+        : true;
+      const typeMatch = filters.type === 'all' || tx.type === filters.type;
+      const categoryMatch = filters.category === 'all' || tx.category?.toLowerCase() === filters.category;
+      let dateMatch = true;
+      const txDate = new Date(tx.date);
+      if (filters.date === 'today') {
+        dateMatch = txDate.toDateString() === new Date().toDateString();
+      } else if (filters.date === 'week') {
+        dateMatch = isThisWeek(txDate);
+      } else if (filters.date === 'month') {
+        const now = new Date();
+        dateMatch = txDate.getMonth() === now.getMonth() && txDate.getFullYear() === now.getFullYear();
+      }
+      return searchMatch && typeMatch && categoryMatch && dateMatch;
+    });
+    // FIX: Provide dependencies for useMemo
+  }, [transactions, searchTerm, filters]);
+
+  useEffect(() => {
+    const calculateTotals = () => {
+      let income = 0;
+      let expense = 0;
+
+      filteredTransactions.forEach(tx => {
+        if (tx.type === 'income') {
+          income += Number(tx.amount);
+        } else {
+          expense += Number(tx.amount);
+        }
+      });
+      setDisplayTotals({ income, expense });
+    };
+
+    calculateTotals();
+  }, [filteredTransactions]);
 
   return (
     <div className="p-4 space-y-4">
@@ -98,13 +118,13 @@ export default function TransactionsList({ userId }) {
         <Card className="flex-1 bg-slate-100 dark:bg-slate-800 shadow-sm rounded-xl border-green-300">
           <CardContent className="p-3 text-center">
             <h2 className="text-sm font-medium text-black dark:text-white">Income</h2>
-            <p className="text-lg font-bold text-green-700">+₹{totals.income}</p>
+            <p className="text-lg font-bold text-green-700">+₹{displayTotals.income}</p>
           </CardContent>
         </Card>
         <Card className="flex-1 bg-slate-100 dark:bg-slate-800 shadow-sm rounded-xl border-red-300">
           <CardContent className="p-3 text-center">
             <h2 className="text-sm font-medium text-black dark:text-white">Expenses</h2>
-            <p className="text-lg font-bold text-red-600">-₹{totals.expense}</p>
+            <p className="text-lg font-bold text-red-600">-₹{displayTotals.expense}</p>
           </CardContent>
         </Card>
       </div>
@@ -115,8 +135,6 @@ export default function TransactionsList({ userId }) {
           resetFilters={resetFilters}
         />
       </div>
-
-      {/* Conditional Rendering for Empty State */}
       <div className="space-y-3 pb-16">
         {loading ? (
           [1, 2, 3].map((i) => (
@@ -165,7 +183,6 @@ export default function TransactionsList({ userId }) {
           />
         )}
       </div>
-
       <EditTransactionDialog
         open={isDialogOpen}
         onClose={() => setIsDialogOpen(false)}

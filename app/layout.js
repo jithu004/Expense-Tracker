@@ -9,10 +9,12 @@ const outfit = Outfit({
 });
 
 export const metadata = {
-  title: 'Expense Tracker',
-  description: 'Manage your expenses with ease.',
+  title: "Trackify",
+  description: "Manage your expenses and control your money.",
+  icons: {
+    icon: "/logo.svg",
+  },
 };
-
 export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>

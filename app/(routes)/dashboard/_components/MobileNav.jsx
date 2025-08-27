@@ -10,7 +10,6 @@ function MobileNav({ isOpen, toggleMenu }) {
     { id: 1, name: 'Dashboard', icon: LayoutGrid, path: '/dashboard' },
     { id: 2, name: 'Budgets', icon: PiggyBank, path: '/dashboard/budgets' },
     { id: 3, name: 'Transactions', icon: ReceiptText, path: '/dashboard/transactions' },
-    { id: 4, name: 'Upgrade', icon: ShieldCheck, path: '/dashboard/upgrade' },
   ];
 
   return (
