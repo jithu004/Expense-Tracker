@@ -1,5 +1,6 @@
 import { SignUp } from '@clerk/nextjs'
 
 export default function Page() {
-  return <SignUp />
+  // FIX: Add the afterSignUpUrl prop
+  return <SignUp afterSignUpUrl="/dashboard" />
 }

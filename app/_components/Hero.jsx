@@ -1,9 +1,12 @@
-// app/_components/Hero.jsx
-import Image from 'next/image';
-import Link from 'next/link'; // Import Link
-import React from 'react';
+"use client"; // Add this line to make it a client component
+import Image from "next/image";
+import Link from "next/link";
+import React from "react";
+import { useUser } from "@clerk/nextjs"; // Import the useUser hook
 
 function Hero() {
+  const { isSignedIn } = useUser(); // Get the user's sign-in status
+
   return (
     <section className="bg-white flex items-center flex-col">
       <div className="mx-auto w-screen max-w-screen-xl px-4 py-16 sm:px-6 sm:py-24 lg:px-8 lg:py-32">
@@ -12,16 +15,14 @@ function Hero() {
             Manage Your Expenses
             <strong className="text-indigo-600"> Control Your Money</strong>
           </h1>
-
           <p className="mt-4 text-base text-pretty text-gray-700 sm:text-lg/relaxed">
-            Start Budgetting Today And Save Money
+            Start Budgeting Today And Save Money
           </p>
-
           <div className="mt-4 flex justify-center gap-4 sm:mt-6">
-            {/* FIX: Replaced <a> with <Link> for client-side navigation */}
+            {/* FIX: Conditionally change the link based on sign-in status */}
             <Link
               className="inline-block rounded border border-indigo-600 bg-indigo-600 px-5 py-3 font-medium text-white shadow-sm transition-colors hover:bg-indigo-700"
-              href="/sign-in"
+              href={isSignedIn ? "/dashboard" : "/sign-in"}
             >
               Get Started
             </Link>
@@ -29,7 +30,7 @@ function Hero() {
         </div>
       </div>
       <Image
-        src={'/Dashboard.png'}
+        src={"/Dashboard.png"}
         alt="Dashboard"
         width={1000}
         height={700}
