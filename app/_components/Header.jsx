@@ -9,10 +9,10 @@ function Header() {
   const { user, isSignedIn } = useUser();
 
   return (
-    <div className="Header p-2.5 mb-5 flex justify-between items-center shadow-md bg-white dark:bg-slate-900">
+    // FIX: Changed background to bg-gray-900 and removed shadow-md
+    <div className="Header p-2.5 flex justify-between items-center bg-gray-900">
       <Image src="/logo.svg" alt="logo" width={70} height={40} />
       
-      {/* FIX: This now correctly shows the UserButton or a smart "Get Started" link */}
       {isSignedIn ? (
         <UserButton />
       ) : (
