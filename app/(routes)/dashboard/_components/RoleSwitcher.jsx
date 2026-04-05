@@ -1,15 +1,32 @@
 "use client";
 import { useRole } from '../_context/RoleContext';
 import { Shield, Eye } from 'lucide-react';
+import { useState, useEffect } from 'react';
 
 export default function RoleSwitcher() {
   const { role, setRole } = useRole();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // render placeholder with same dimensions until mounted
+  if (!mounted) {
+    return (
+      <div className="flex items-center gap-2 px-3 py-2 rounded-lg
+                      bg-slate-100 dark:bg-slate-800 border
+                      border-slate-200 dark:border-slate-700">
+        <div className="h-7 w-32 rounded-md bg-slate-200 dark:bg-slate-700" />
+      </div>
+    );
+  }
 
   return (
-    <div className="flex items-center gap-2 px-3 py-2 rounded-lg 
-                    bg-slate-100 dark:bg-slate-800 border 
+    <div className="flex items-center gap-2 px-3 py-2 rounded-lg
+                    bg-slate-100 dark:bg-slate-800 border
                     border-slate-200 dark:border-slate-700">
-      <div className="flex rounded-md overflow-hidden border 
+      <div className="flex rounded-md overflow-hidden border
                       border-slate-300 dark:border-slate-600 text-xs font-medium">
         <button
           onClick={() => setRole('admin')}

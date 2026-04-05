@@ -1,51 +1,44 @@
 "use client";
-// FIX: Import useMemo
 import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { getTransactions } from "@/app/actions/getTransactions";
 import { Card, CardContent } from "@/components/ui/card";
-import CreateTransaction from "./CreateTransaction";
 import FilterBox from "./FilterBox";
 import EditTransactionDialog from "./EditTransactionDialog";
 import { updateTransaction } from "@/app/actions/updateTransaction";
 import { deleteTransaction } from "@/app/actions/deleteTransaction";
 import { useSearch } from "../../_context/SearchContext";
 import EmptyState from "../../_components/EmptyState";
-import { ReceiptText } from "lucide-react";
-import { Download } from "lucide-react";
+import { ReceiptText, Download } from "lucide-react";
 
-export default function TransactionsList({ userId }) {
+export default function TransactionsList({ userId, onTransactionCreated }) {
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedTx, setSelectedTx] = useState(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const { searchTerm } = useSearch();
-
   const [displayTotals, setDisplayTotals] = useState({ income: 0, expense: 0 });
-
   const [filters, setFilters] = useState({
     date: "all",
     category: "all",
     type: "all",
   });
+  const { searchTerm } = useSearch();
 
-  const resetFilters = () => {
+  const resetFilters = () =>
     setFilters({ date: "all", category: "all", type: "all" });
-  };
+
   const handleOpenDialog = (tx) => {
     setSelectedTx(tx);
     setIsDialogOpen(true);
   };
+
   const handleSave = async (updatedTx) => {
     const res = await updateTransaction(updatedTx);
-    if (res.success) {
-      await fetchData();
-    }
+    if (res.success) await fetchData();
   };
+
   const handleDelete = async (tx) => {
     const res = await deleteTransaction(tx.id, tx.type);
-    if (res.success) {
-      await fetchData();
-    }
+    if (res.success) await fetchData();
   };
 
   const fetchData = useCallback(async () => {
@@ -69,7 +62,6 @@ export default function TransactionsList({ userId }) {
     return txDate >= weekStart && txDate < weekEnd;
   };
 
-  // FIX: Wrap the filtering logic in useMemo
   const filteredTransactions = useMemo(() => {
     return transactions.filter((tx) => {
       const searchMatch = searchTerm
@@ -93,26 +85,18 @@ export default function TransactionsList({ userId }) {
       }
       return searchMatch && typeMatch && categoryMatch && dateMatch;
     });
-    // FIX: Provide dependencies for useMemo
   }, [transactions, searchTerm, filters]);
 
   useEffect(() => {
-    const calculateTotals = () => {
-      let income = 0;
-      let expense = 0;
-
-      filteredTransactions.forEach((tx) => {
-        if (tx.type === "income") {
-          income += Number(tx.amount);
-        } else {
-          expense += Number(tx.amount);
-        }
-      });
-      setDisplayTotals({ income, expense });
-    };
-
-    calculateTotals();
+    let income = 0;
+    let expense = 0;
+    filteredTransactions.forEach((tx) => {
+      if (tx.type === "income") income += Number(tx.amount);
+      else expense += Number(tx.amount);
+    });
+    setDisplayTotals({ income, expense });
   }, [filteredTransactions]);
+
   const exportToCSV = () => {
     const headers = ["Date", "Name", "Type", "Category", "Amount"];
     const rows = filteredTransactions.map((tx) => [
@@ -131,8 +115,10 @@ export default function TransactionsList({ userId }) {
     a.click();
     URL.revokeObjectURL(url);
   };
+
   return (
-    <div className="p-4 space-y-4">
+    <div className="space-y-4">
+      {/* Summary cards */}
       <div className="flex items-center justify-between gap-3">
         <Card className="flex-1 bg-slate-100 dark:bg-slate-800 shadow-sm rounded-xl border-green-300">
           <CardContent className="p-3 text-center">
@@ -140,7 +126,7 @@ export default function TransactionsList({ userId }) {
               Income
             </h2>
             <p className="text-lg font-bold text-green-700">
-              +₹{displayTotals.income}
+              +₹{displayTotals.income.toLocaleString("en-IN")}
             </p>
           </CardContent>
         </Card>
@@ -150,12 +136,14 @@ export default function TransactionsList({ userId }) {
               Expenses
             </h2>
             <p className="text-lg font-bold text-red-600">
-              -₹{displayTotals.expense}
+              -₹{displayTotals.expense.toLocaleString("en-IN")}
             </p>
           </CardContent>
         </Card>
       </div>
-      <div className="px-1 space-y-2">
+
+      {/* Filters + Export */}
+      <div className="space-y-2">
         <FilterBox
           filters={filters}
           setFilters={setFilters}
@@ -164,15 +152,17 @@ export default function TransactionsList({ userId }) {
         <div className="flex justify-end">
           <button
             onClick={exportToCSV}
-            className="flex items-center gap-2 text-sm text-indigo-600 border border-indigo-300 
-                 px-3 py-1.5 rounded-md hover:bg-indigo-50 dark:hover:bg-indigo-900/20 
-                 transition-colors"
+            className="flex items-center gap-2 text-sm text-indigo-600
+                       border border-indigo-300 px-3 py-1.5 rounded-md
+                       hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-colors"
           >
             <Download className="h-4 w-4" />
             Export CSV
           </button>
         </div>
       </div>
+
+      {/* Transaction list */}
       <div className="space-y-3 pb-16">
         {loading ? (
           [1, 2, 3].map((i) => (
@@ -186,20 +176,20 @@ export default function TransactionsList({ userId }) {
             <div
               key={`${tx.type}-${tx.id}`}
               onClick={() => handleOpenDialog(tx)}
-              className="cursor-pointer bg-white dark:bg-slate-800 rounded-xl shadow-sm 
-             border border-slate-100 dark:border-slate-700
-             hover:shadow-md hover:border-indigo-200 dark:hover:border-indigo-700
-             transition-all duration-200 p-4 flex items-center justify-between gap-3"
+              className="cursor-pointer bg-white dark:bg-slate-800 rounded-xl shadow-sm
+                         border border-slate-100 dark:border-slate-700
+                         hover:shadow-md hover:border-indigo-200 dark:hover:border-indigo-700
+                         transition-all duration-200 p-4 flex items-center justify-between gap-3"
             >
               {/* Left: icon + details */}
               <div className="flex items-center gap-3">
                 <div
                   className={`p-2.5 rounded-full shrink-0
-      ${
-        tx.type === "income"
-          ? "bg-green-100 dark:bg-green-900/30"
-          : "bg-red-100 dark:bg-red-900/30"
-      }`}
+                  ${
+                    tx.type === "income"
+                      ? "bg-green-100 dark:bg-green-900/30"
+                      : "bg-red-100 dark:bg-red-900/30"
+                  }`}
                 >
                   <span className="text-lg">
                     {tx.type === "income"
@@ -214,7 +204,11 @@ export default function TransactionsList({ userId }) {
                               ? "🎬"
                               : tx.category === "Bills"
                                 ? "📄"
-                                : "💸"}
+                                : tx.category === "Health"
+                                  ? "💊"
+                                  : tx.category === "Education"
+                                    ? "📚"
+                                    : "💸"}
                   </span>
                 </div>
                 <div>
@@ -231,17 +225,18 @@ export default function TransactionsList({ userId }) {
                     </span>
                     <span
                       className={`text-xs px-2 py-0.5 rounded-full font-medium
-          ${
-            tx.type === "income"
-              ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
-              : "bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300"
-          }`}
+                      ${
+                        tx.type === "income"
+                          ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                          : "bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300"
+                      }`}
                     >
                       {tx.category}
                     </span>
                   </div>
                 </div>
               </div>
+
               {/* Right: amount */}
               <div className="text-right shrink-0">
                 <p
@@ -266,12 +261,13 @@ export default function TransactionsList({ userId }) {
             }
             subtitle={
               transactions.length === 0
-                ? "Click the '+' button to add your first transaction."
+                ? "Click 'Add Transaction' above to get started."
                 : "Try adjusting your search or filters."
             }
           />
         )}
       </div>
+
       <EditTransactionDialog
         open={isDialogOpen}
         onClose={() => setIsDialogOpen(false)}
