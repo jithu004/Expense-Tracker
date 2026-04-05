@@ -1,4 +1,5 @@
 "use client";
+import { useRole } from "@/app/(routes)/dashboard/_context/RoleContext";
 import React, { useState, useEffect } from "react";
 import {
   Dialog,
@@ -27,6 +28,8 @@ import { createTransaction } from "@/app/actions/createTransaction";
 import { Plus } from "lucide-react";
 
 function CreateTransaction({ onTransactionCreated }) {
+  const { role } = useRole();
+  if (role === "viewer") return null;
   const { user } = useUser();
 
   const [type, setType] = useState("expense");
@@ -89,14 +92,12 @@ function CreateTransaction({ onTransactionCreated }) {
         {/* FIX: Replaced the <Button> component with a standard <button> tag */}
         <button
           className={cn(
-            buttonVariants({ size: "icon" }),
-            `h-20 w-20 rounded-full bg-indigo-600 shadow-lg
-             hover:rounded-xl hover:bg-indigo-700
-             transition-all duration-300 ease-in-out
-             animate-pulse-glow`
+            buttonVariants({ size: "default" }),
+            "bg-indigo-600 hover:bg-indigo-700 text-white flex items-center gap-2 px-4 py-2 rounded-lg",
           )}
         >
-          <Plus className="size-10" strokeWidth={3} />
+          <Plus className="h-4 w-4" strokeWidth={2.5} />
+          Add Transaction
         </button>
       </DialogTrigger>
 
@@ -144,7 +145,7 @@ function CreateTransaction({ onTransactionCreated }) {
                   <SelectItem key={cat} value={cat}>
                     {cat}
                   </SelectItem>
-                )
+                ),
               )}
               <SelectItem value="custom">Custom</SelectItem>
             </SelectContent>

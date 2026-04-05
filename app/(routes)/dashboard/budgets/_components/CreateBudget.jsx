@@ -1,4 +1,5 @@
 "use client";
+import { useRole } from "@/app/(routes)/dashboard/_context/RoleContext";
 import React, { useState } from "react";
 import {
   Dialog,
@@ -18,10 +19,12 @@ import { createBudget } from "@/app/actions/createBudgets";
 import { useUser } from "@clerk/nextjs";
 
 function CreateBudget({ refreshData }) {
+  const { role } = useRole();
+  if (role === "viewer") return null;
   const { user } = useUser();
   const [emojiIcon, setEmojiIcon] = useState("🙂");
   const [openEmojiPicker, setOpenEmojiPicker] = useState(false);
-  
+
   // FIX: Initialize state with an empty string to make inputs controlled
   const [name, setName] = useState("");
   const [amount, setAmount] = useState("");
@@ -83,7 +86,9 @@ function CreateBudget({ refreshData }) {
             </div>
 
             <div>
-              <h2 className="text-black dark:text-white my-1 font-medium">Budget Name</h2>
+              <h2 className="text-black dark:text-white my-1 font-medium">
+                Budget Name
+              </h2>
               <Input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
@@ -92,7 +97,9 @@ function CreateBudget({ refreshData }) {
             </div>
 
             <div>
-              <h2 className="text-black dark:text-white my-1 font-medium">Budget Amount</h2>
+              <h2 className="text-black dark:text-white my-1 font-medium">
+                Budget Amount
+              </h2>
               <Input
                 type="number"
                 value={amount}

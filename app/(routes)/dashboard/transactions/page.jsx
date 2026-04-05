@@ -1,26 +1,36 @@
-"use client"
-import React, { useRef } from 'react'
-import CreateTransaction from "./_components/CreateTransaction"
-import TransactionList from "./_components/TransactionsList"
-import { useUser } from '@clerk/nextjs'
+"use client";
+import React from 'react';
+import TransactionList from "./_components/TransactionsList";
+import CreateTransaction from "./_components/CreateTransaction";
+import { useUser } from '@clerk/nextjs';
+import { useRole } from '../_context/RoleContext';
 
 function Transactions() {
   const { user } = useUser();
-  const listRef = useRef(null);
+  const { role } = useRole();
 
   return (
-    <div className='p-5'> 
-      <TransactionList ref={listRef} userId={user?.primaryEmailAddress?.emailAddress} />
-
-      {/* <div className='fixed mt-3 mb-3 bottom-0 right-0'>
-        <CreateTransaction 
-          onTransactionCreated={() => {
-            if (listRef.current) listRef.current.fetchData();
-          }} 
-        /> 
-      </div> */}
+    <div className='p-5'>
+      {/* Header row */}
+      <div className="flex items-center justify-between mb-5">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+            Transactions
+          </h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+            View and manage all your income and expenses
+          </p>
+        </div>
+        {/* Add button — only visible to Admin */}
+        {role === 'admin' && (
+          <CreateTransaction 
+            onTransactionCreated={() => window.location.reload()} 
+          />
+        )}
+      </div>
+      <TransactionList userId={user?.primaryEmailAddress?.emailAddress} />
     </div>
-  )
+  );
 }
 
-export default Transactions
+export default Transactions;

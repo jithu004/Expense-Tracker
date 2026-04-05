@@ -1,4 +1,5 @@
 "use client";
+import { useRole } from '@/app/(routes)/dashboard/_context/RoleContext';
 import React from "react";
 import {
   Dialog,
@@ -30,6 +31,8 @@ function EditTransactionDialog({
   onSave,
   onDelete,
 }) {
+  const { role } = useRole();
+  if (role === "viewer") return null;
   const [form, setForm] = React.useState(transaction || {});
 
   React.useEffect(() => {

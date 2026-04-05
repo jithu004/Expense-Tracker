@@ -1,4 +1,5 @@
 "use client";
+import { useRole } from "@/app/(routes)/dashboard/_context/RoleContext";
 import React, { useState, useEffect } from "react";
 import {
   Dialog,
@@ -27,6 +28,8 @@ import { updateBudget } from "@/app/actions/updateBudget";
 import { deleteBudget } from "@/app/actions/deleteBudget";
 
 function EditBudget({ budget, open, onClose, onUpdate }) {
+  const { role } = useRole();
+  if (role === "viewer") return null;
   const [name, setName] = useState("");
   const [amount, setAmount] = useState("");
   const [emojiIcon, setEmojiIcon] = useState("");
