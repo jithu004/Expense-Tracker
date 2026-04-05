@@ -20,15 +20,13 @@ import { useUser } from "@clerk/nextjs";
 
 function CreateBudget({ refreshData }) {
   const { role } = useRole();
-  if (role === "viewer") return null;
+
   const { user } = useUser();
   const [emojiIcon, setEmojiIcon] = useState("🙂");
   const [openEmojiPicker, setOpenEmojiPicker] = useState(false);
-
-  // FIX: Initialize state with an empty string to make inputs controlled
   const [name, setName] = useState("");
   const [amount, setAmount] = useState("");
-
+  if (role === "viewer") return null;
   const onCreateBudget = async () => {
     const result = await createBudget({
       name,
@@ -40,7 +38,6 @@ function CreateBudget({ refreshData }) {
     if (result) {
       refreshData();
       toast("New Budget Created!");
-      // Also reset the state after creation
       setName("");
       setAmount("");
       setEmojiIcon("🙂");

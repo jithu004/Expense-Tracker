@@ -29,12 +29,12 @@ import { deleteBudget } from "@/app/actions/deleteBudget";
 
 function EditBudget({ budget, open, onClose, onUpdate }) {
   const { role } = useRole();
-  if (role === "viewer") return null;
+
   const [name, setName] = useState("");
   const [amount, setAmount] = useState("");
   const [emojiIcon, setEmojiIcon] = useState("");
   const [openEmojiPicker, setOpenEmojiPicker] = useState(false);
-
+  if (role === "viewer") return null;
   useEffect(() => {
     if (budget) {
       setName(budget.name);

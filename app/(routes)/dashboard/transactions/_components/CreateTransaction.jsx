@@ -29,7 +29,7 @@ import { Plus } from "lucide-react";
 
 function CreateTransaction({ onTransactionCreated }) {
   const { role } = useRole();
-  if (role === "viewer") return null;
+  
   const { user } = useUser();
 
   const [type, setType] = useState("expense");
@@ -49,7 +49,7 @@ function CreateTransaction({ onTransactionCreated }) {
     "Bills",
     "Entertainment",
   ];
-
+  if (role === "viewer") return null;
   useEffect(() => {
     if (user) fetchBudgets();
   }, [user]);

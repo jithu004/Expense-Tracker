@@ -1,27 +1,40 @@
 // app/(routes)/dashboard/_components/MobileNav.jsx
-import React from 'react';
-import { LayoutGrid, PiggyBank, ReceiptText, ShieldCheck } from 'lucide-react';
-import Link from 'next/link';
-import { UserButton } from '@clerk/nextjs';
-import { ThemeToggleButton } from '@/components/ui/ThemeToggleButton';
+import React from "react";
+import {
+  LayoutGrid,
+  PiggyBank,
+  ReceiptText,
+  ShieldCheck,
+  Lightbulb,
+} from "lucide-react";
+import Link from "next/link";
+import { UserButton } from "@clerk/nextjs";
+import { ThemeToggleButton } from "@/components/ui/ThemeToggleButton";
+import RoleSwitcher from "./RoleSwitcher";
 
 function MobileNav({ isOpen, toggleMenu }) {
   const menuList = [
-    { id: 1, name: 'Dashboard', icon: LayoutGrid, path: '/dashboard' },
-    { id: 2, name: 'Budgets', icon: PiggyBank, path: '/dashboard/budgets' },
-    { id: 3, name: 'Transactions', icon: ReceiptText, path: '/dashboard/transactions' },
+    { id: 1, name: "Dashboard", icon: LayoutGrid, path: "/dashboard" },
+    { id: 2, name: "Budgets", icon: PiggyBank, path: "/dashboard/budgets" },
+    {
+      id: 3,
+      name: "Transactions",
+      icon: ReceiptText,
+      path: "/dashboard/transactions",
+    },
+    { id: 4, name: "Insights", icon: Lightbulb, path: "/dashboard/insights" },
   ];
 
   return (
     <div
       className={`fixed inset-0 z-40 bg-black bg-opacity-50 transition-opacity md:hidden ${
-        isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
       }`}
       onClick={toggleMenu}
     >
       <div
         className={`fixed inset-y-0 left-0 w-64 bg-white dark:bg-slate-900 shadow-md transform transition-transform ${
-          isOpen ? 'translate-x-0' : '-translate-x-full'
+          isOpen ? "translate-x-0" : "-translate-x-full"
         }`}
         onClick={(e) => e.stopPropagation()}
       >
