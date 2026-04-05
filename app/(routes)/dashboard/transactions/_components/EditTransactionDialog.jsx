@@ -1,6 +1,5 @@
 "use client";
-import { useRole } from '@/app/(routes)/dashboard/_context/RoleContext';
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -20,9 +19,9 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useRole } from "../../_context/RoleContext";
 
 function EditTransactionDialog({
   open,
@@ -31,40 +30,46 @@ function EditTransactionDialog({
   onSave,
   onDelete,
 }) {
+  // ALL hooks must be at the top — never after a conditional return
   const { role } = useRole();
-  if (role === "viewer") return null;
-  const [form, setForm] = React.useState(transaction || {});
+  const [form, setForm] = useState(transaction || {});
 
-  React.useEffect(() => {
+  useEffect(() => {
     setForm(transaction || {});
   }, [transaction]);
+
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
+
   const handleSave = () => {
     onSave(form);
     toast.success("Transaction updated successfully!");
     onClose();
-    };
+  };
+
   const handleDelete = () => {
-  onDelete(transaction);
-   toast.error("Transaction deleted!");
-  onClose();
-};
+    onDelete(transaction);
+    toast.error("Transaction deleted!");
+    onClose();
+  };
+
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="rounded-2xl">
         <DialogHeader>
-          <DialogTitle>Edit Transaction</DialogTitle>
+          <DialogTitle>
+            {role === "viewer" ? "Transaction Details" : "Edit Transaction"}
+          </DialogTitle>
         </DialogHeader>
 
-        {/* Form Fields */}
         <div className="space-y-4 mt-2">
           <Input
             name="title"
             value={form.title || ""}
             onChange={handleChange}
             placeholder="Title"
+            disabled={role === "viewer"}
           />
           <Input
             name="amount"
@@ -72,43 +77,52 @@ function EditTransactionDialog({
             value={form.amount || ""}
             onChange={handleChange}
             placeholder="Amount"
+            disabled={role === "viewer"}
           />
           <Input
             name="category"
             value={form.category || ""}
             onChange={handleChange}
             placeholder="Category"
+            disabled={role === "viewer"}
           />
         </div>
 
         <DialogFooter className="flex justify-between mt-4">
-          {/* Delete with confirmation */}
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button variant="destructive">Delete</Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent className="rounded-2xl">
-              <AlertDialogHeader>
-                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  This action cannot be undone. The transaction will be
-                  permanently deleted.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction
-                  className="bg-red-600 hover:bg-red-700"
-                  onClick={() => handleDelete(transaction)}
-                >
-                  Yes, Delete
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-
-          {/* Save button */}
-          <Button onClick={handleSave}>Save</Button>
+          {role === "admin" ? (
+            <>
+              {/* Delete with confirmation */}
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="destructive">Delete</Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent className="rounded-2xl">
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This action cannot be undone. The transaction will be
+                      permanently deleted.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                      className="bg-red-600 hover:bg-red-700"
+                      onClick={handleDelete}
+                    >
+                      Yes, Delete
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+              <Button onClick={handleSave}>Save</Button>
+            </>
+          ) : (
+            // Viewer — close button only
+            <Button variant="outline" onClick={onClose} className="ml-auto">
+              Close
+            </Button>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>
