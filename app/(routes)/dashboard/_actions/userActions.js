@@ -9,12 +9,8 @@ import { eq } from "drizzle-orm";
 
 // This function will run securely on the server
 export const checkUserBudget = async () => {
-  const { user } = auth();
-
-  if (!user) {
-    // Handle case where there is no user
-    return false;
-  }
+  const { userId } = await auth();
+  if (!userId) return false;
 
   const result = await db
     .select()
