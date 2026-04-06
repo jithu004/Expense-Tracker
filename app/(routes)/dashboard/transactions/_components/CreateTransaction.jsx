@@ -11,7 +11,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-// FIX: Import 'buttonVariants' from the button component and 'cn' utility
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
@@ -29,7 +28,7 @@ import { Plus } from "lucide-react";
 
 function CreateTransaction({ onTransactionCreated }) {
   const { role } = useRole();
-  
+
   const { user } = useUser();
 
   const [type, setType] = useState("expense");
@@ -49,7 +48,7 @@ function CreateTransaction({ onTransactionCreated }) {
     "Bills",
     "Entertainment",
   ];
-  if (role === "viewer") return null;
+
   useEffect(() => {
     if (user) fetchBudgets();
   }, [user]);
@@ -85,7 +84,7 @@ function CreateTransaction({ onTransactionCreated }) {
       console.error(res.error);
     }
   };
-
+  if (role === "viewer") return null;
   return (
     <Dialog>
       <DialogTrigger asChild>

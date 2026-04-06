@@ -26,7 +26,7 @@ function CreateBudget({ refreshData }) {
   const [openEmojiPicker, setOpenEmojiPicker] = useState(false);
   const [name, setName] = useState("");
   const [amount, setAmount] = useState("");
-  if (role === "viewer") return null;
+
   const onCreateBudget = async () => {
     const result = await createBudget({
       name,
@@ -43,6 +43,7 @@ function CreateBudget({ refreshData }) {
       setEmojiIcon("🙂");
     }
   };
+  if (role === "viewer") return null;
 
   return (
     <div>

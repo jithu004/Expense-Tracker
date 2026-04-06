@@ -34,7 +34,7 @@ function EditBudget({ budget, open, onClose, onUpdate }) {
   const [amount, setAmount] = useState("");
   const [emojiIcon, setEmojiIcon] = useState("");
   const [openEmojiPicker, setOpenEmojiPicker] = useState(false);
-  if (role === "viewer") return null;
+
   useEffect(() => {
     if (budget) {
       setName(budget.name);
@@ -65,7 +65,7 @@ function EditBudget({ budget, open, onClose, onUpdate }) {
       toast.error(result.error);
     }
   };
-
+  if (role === "viewer") return null;
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent>
